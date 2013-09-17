@@ -1,0 +1,61 @@
+class StockMutation < ActiveRecord::Base
+  belongs_to :stock_mutation_source, :polymorphic => true 
+  
+  # has_many :transaction_activities, :as => :transaction_source
+  belongs_to :item
+  belongs_to :warehouse_item 
+  belongs_to :warehouse 
+  
+  
+  
+  # def self.create_object( params ) 
+  #   # if there is no warehouse_item 
+  #   # create the target warehouse item. 
+  # end
+  # 
+  # def update_object( params ) 
+  #   # if the new target doesn't have warehouse_item
+  #   # create the target warehouse_item 
+  # end
+  
+  def delete_object  
+    diff = -1*self.quantity 
+    
+    self.update_quantity( diff  )
+    self.destroy 
+  end
+  
+  
+  def update_quantity( diff )  
+    stock_mutation_case = self.case 
+    
+    if stock_mutation_case == STOCK_MUTATION_CASE[:ready]
+      warehouse_item.update_ready( diff  )
+      item.update_ready( diff  )
+    elsif stock_mutation_case == STOCK_MUTATION_CASE[:pending_receival]
+      warehouse_item.update_pending_receival( diff  )
+      item.update_pending_receival( diff  )
+    elsif stock_mutation_case == STOCK_MUTATION_CASE[:pending_delivery]
+      warehouse_item.update_pending_delivery( diff  )
+      item.update_pending_delivery( diff  )
+    end
+  end
+  
+  
+  def self.create_stock_adjustment_mutation(sms)
+    new_object = self.new 
+    new_object.stock_mutation_source_type = sms.class.to_s
+    new_object.stock_mutation_source_id = sms.id 
+    new_object.warehouse_id = sms.warehouse_id
+    new_object.warehouse_item_id = sms.warehouse_item_id 
+    new_object.item_id = sms.item_id 
+    
+    new_object.quantity = sms.diff 
+    new_object.mutated_at = sms.confirmed_at 
+    new_object.case = STOCK_MUTATION_CASE[:ready]
+    
+    if new_object.save 
+      new_object.update_quantity( new_object.quantity )
+    end
+  end
+end
