@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130917032916) do
+ActiveRecord::Schema.define(version: 20130917053947) do
 
   create_table "items", force: true do |t|
     t.string   "name"
@@ -47,6 +47,18 @@ ActiveRecord::Schema.define(version: 20130917032916) do
     t.integer  "stock_mutation_source_id"
     t.string   "stock_mutation_source_type"
     t.datetime "mutated_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "warehouse_item_mutations", force: true do |t|
+    t.integer  "source_warehouse_id"
+    t.integer  "target_warehouse_id"
+    t.integer  "quantity"
+    t.integer  "item_id"
+    t.boolean  "is_confirmed",        default: false
+    t.string   "code"
+    t.datetime "confirmed_at"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
