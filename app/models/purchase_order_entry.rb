@@ -8,6 +8,7 @@ class PurchaseOrderEntry < ActiveRecord::Base
   validate :valid_quantity
   validate :valid_item_id
   validate :valid_purchase_order_id 
+  validate :unique_purchase_order_entry_item_id
 
   
   def all_fields_present?
@@ -33,6 +34,32 @@ class PurchaseOrderEntry < ActiveRecord::Base
     rescue
       self.errors.add(:item_id, "Harus memilih item") 
       return self 
+    end
+  end
+  
+  def unique_purchase_order_entry_item_id
+    return if not all_fields_present?
+    
+    begin
+      
+      parent = self.purchase_order
+      purchase_order_entry_count = PurchaseOrderEntry.where(
+        :item_id => self.item_id,
+        :purchase_order_id => parent.id  
+      ).count 
+
+      item = self.item 
+      purchase_order = self.purchase_order
+      msg = "Item #{item.name} dari pemesanan #{purchase_order.code} sudah terdaftar di pembelian ini"
+
+      if not self.persisted? and purchase_order_entry_count != 0
+        errors.add(:item_id , msg ) 
+      elsif self.persisted? and not self.item_id_changed? and purchase_order_entry_count > 1 
+        errors.add(:item_id , msg ) 
+      elsif self.persisted? and  self.item_id_changed? and purchase_order_entry_count  != 0 
+        errors.add(:item_id , msg )
+      end
+    rescue
     end
   end
   

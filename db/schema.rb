@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130917072229) do
+ActiveRecord::Schema.define(version: 20130917161407) do
 
   create_table "items", force: true do |t|
     t.string   "name"
@@ -43,6 +43,16 @@ ActiveRecord::Schema.define(version: 20130917072229) do
     t.boolean  "is_confirmed", default: false
     t.datetime "confirmed_at"
     t.string   "code"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "purchase_receival_entries", force: true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "purchase_receivals", force: true do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
   end

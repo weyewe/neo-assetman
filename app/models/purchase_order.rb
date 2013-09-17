@@ -3,14 +3,24 @@ class PurchaseOrder < ActiveRecord::Base
   belongs_to :supplier 
   
   
-  validates_presence_of :supplier_id , :warehouse_id
+  validates_presence_of :supplier_id , :warehouse_id, :code 
+  validates_uniqueness_of :code 
   
   validate :valid_supplier_id 
   validate :valid_warehouse_id 
+  validate :valid_code
+  
+  def valid_code
+    if code.present? and code.length == 0
+      self.errors.add(:code, "Harus ada code PO")
+      return self 
+    end
+  end
   
   def all_fields_present?
     supplier_id.present? and 
-    warehouse_id.present?  
+    warehouse_id.present?  and 
+    code.present? 
   end
   
   def valid_supplier_id
@@ -42,6 +52,7 @@ class PurchaseOrder < ActiveRecord::Base
     new_object.purchased_at = params[:purchased_at]
     new_object.warehouse_id = params[:warehouse_id ] 
     new_object.description = params[:description]
+    new_object.code  = params[:code]
     
     new_object.save
     return new_object
@@ -56,6 +67,7 @@ class PurchaseOrder < ActiveRecord::Base
     self.purchased_at = params[:purchased_at]
     self.warehouse_id = params[:warehouse_id ] 
     self.description = params[:description]
+    self.code = params[:code]
     self.save
     return self
   end

@@ -21,9 +21,12 @@ describe PurchaseOrder do
     @po = PurchaseOrder.create_object(
       :supplier_id => @supplier.id ,
       :warehouse_id => @wh_1.id ,
-      :description => "The description"
+      :description => "The description",
+      :code => "PO1234"
     )
-    
+    @po.errors.messages.each do |msg|
+      puts "The message: #{msg}"
+    end 
     @po.should be_valid 
   end
   
@@ -31,7 +34,8 @@ describe PurchaseOrder do
     @po = PurchaseOrder.create_object(
       :supplier_id => @supplier.id ,
       :warehouse_id => 0,
-      :description => "The description"
+      :description => "The description",
+      :code => "PO1234"
     )
     
     @po.should_not be_valid
@@ -43,7 +47,8 @@ describe PurchaseOrder do
       @po = PurchaseOrder.create_object(
         :supplier_id => @supplier.id ,
         :warehouse_id => @wh_1.id ,
-        :description => "The description"
+        :description => "The description",
+        :code => "PO1234"
       )
        
     end
@@ -121,7 +126,8 @@ describe PurchaseOrder do
           @po.update_object(
             :supplier_id => @supplier.id ,
             :warehouse_id => @wh_1.id ,
-            :description => "The description 2"
+            :description => "The description 2",
+            :code => "PO1234"
           )
           @po.errors.size.should_not == 0 
         end
@@ -146,7 +152,8 @@ describe PurchaseOrder do
             @po.update_object(
               :supplier_id => @supplier.id ,
               :warehouse_id => @wh_1.id ,
-              :description => "The description 2"
+              :description => "The description 2",
+              :code => "PO1234"
             )
             @po.errors.size.should == 0
           end

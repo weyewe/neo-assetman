@@ -14,6 +14,7 @@ class CreatePurchaseOrders < ActiveRecord::Migration
       t.string :code 
       
       
+      
 
       t.timestamps
     end

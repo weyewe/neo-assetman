@@ -19,7 +19,8 @@ describe PurchaseOrderEntry do
     @po = PurchaseOrder.create_object(
       :supplier_id => @supplier.id ,
       :warehouse_id => @wh_1.id ,
-      :description => "The description"
+      :description => "The description",
+      :code => "PO1234"
     )
   end
 

@@ -1,0 +1,3 @@
+on create purchase_order
+1. enter the code  (uniq) and length != 0 
+2. validate uniqueness of item ==> the code is somewhere
