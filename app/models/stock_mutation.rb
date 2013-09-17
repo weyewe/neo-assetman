@@ -111,6 +111,30 @@ class StockMutation < ActiveRecord::Base
   def self.create_warehouse_item_mutation_stock_mutation( sms ) 
     self.create_deduction_from_source_warehouse(sms)
     self.create_addition_to_target_warehouse( sms ) 
+  end
+  
+=begin
+  Purchase Order Entry
+=end
+  def self.create_purchase_order_entry_stock_mutation( poe)
+    warehouse_item = WarehouseItem.find_or_create_object(
+      :warehouse_id => poe.po.warehouse_id , 
+      :item_id => poe.item_id 
+    ) 
     
+    new_object = self.new 
+    new_object.stock_mutation_source_type = poe.class.to_s
+    new_object.stock_mutation_source_id = poe.id 
+    new_object.warehouse_id = poe.po.warehouse_id 
+    new_object.warehouse_item_id = warehouse_item.id 
+    new_object.item_id = poe.item_id 
+    
+    new_object.quantity = poe.quantity 
+    new_object.mutated_at = poe.confirmed_at 
+    new_object.case = STOCK_MUTATION_CASE[:pending_receival]
+    
+    if new_object.save 
+      new_object.update_quantity( new_object.quantity )
+    end
   end
 end

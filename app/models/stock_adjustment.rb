@@ -140,11 +140,8 @@ class StockAdjustment < ActiveRecord::Base
   def unconfirm
     return if not self.is_confirmed? 
     
-    reverse_adjustment_quantity = -1*diff 
-    # puts "initial item ready : #{item.ready}" 
-    # puts "initial wh_item ready: #{warehouse_item.ready}"
+    reverse_adjustment_quantity = -1*diff  
     
-    # puts "reverse adjusemtnet: #{ reverse_adjustment_quantity}"
     final_item_quantity = item.ready  + reverse_adjustment_quantity
     final_warehouse_item_quantity = warehouse_item.ready  + reverse_adjustment_quantity
     

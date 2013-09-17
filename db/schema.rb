@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130917053947) do
+ActiveRecord::Schema.define(version: 20130917072229) do
 
   create_table "items", force: true do |t|
     t.string   "name"
@@ -20,6 +20,26 @@ ActiveRecord::Schema.define(version: 20130917053947) do
     t.integer  "ready",            default: 0
     t.integer  "pending_receival", default: 0
     t.integer  "pending_delivery", default: 0
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "purchase_order_entries", force: true do |t|
+    t.integer  "purchase_order_id"
+    t.integer  "quantity"
+    t.integer  "item_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "purchase_orders", force: true do |t|
+    t.integer  "supplier_id"
+    t.datetime "purchased_at"
+    t.integer  "warehouse_id"
+    t.text     "description"
+    t.boolean  "is_confirmed", default: false
+    t.datetime "confirmed_at"
+    t.string   "code"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -47,6 +67,12 @@ ActiveRecord::Schema.define(version: 20130917053947) do
     t.integer  "stock_mutation_source_id"
     t.string   "stock_mutation_source_type"
     t.datetime "mutated_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "suppliers", force: true do |t|
+    t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
