@@ -9,7 +9,7 @@ class StockAdjustment < ActiveRecord::Base
   validate :valid_warehouse_id
   validate :valid_item_id 
   validate :valid_actual_quantity 
-  validate :non_zero_diff 
+  # validate :non_zero_diff 
   
   
   
@@ -51,19 +51,23 @@ class StockAdjustment < ActiveRecord::Base
     end
   end
   
-  def non_zero_diff
+  def non_zero_diff?
     return if not self.all_fields_present?
-     
+    return if self.is_confirmed?  
     
     begin
       quantity_initial = warehouse_item.ready 
       quantity_diff = self.actual_quantity - quantity_initial
 
-      if quantity_diff == 0 
-        self.errors.add(:actual_quantity , "Sama seperti quantity yang sudah ada")
-        return self 
-      end
+
+      return quantity_diff == 0
+      # if quantity_diff == 0 
+      #   return false
+      #   self.errors.add(:actual_quantity , "Sama seperti quantity yang sudah ada")
+      #   return self 
+      # end
     rescue 
+      return false 
     end
   end
   
@@ -78,6 +82,11 @@ class StockAdjustment < ActiveRecord::Base
     new_object.item_id = params[:item_id]
     new_object.warehouse_id = params[:warehouse_id]
     new_object.actual_quantity = params[:actual_quantity]
+    
+    if new_object.non_zero_diff?
+      self.errors.add(:actual_quantity , "Sama seperti quantity yang sudah ada")
+      return self 
+    end
     
     if new_object.save 
       new_object.assign_warehouse_item  
@@ -94,6 +103,12 @@ class StockAdjustment < ActiveRecord::Base
     self.item_id = params[:item_id]
     self.warehouse_id = params[:warehouse_id]
     self.actual_quantity = params[:actual_quantity]
+    
+    
+    if self.non_zero_diff?
+      self.errors.add(:actual_quantity , "Sama seperti quantity yang sudah ada")
+      return self 
+    end
     
     if self.save 
       self.assign_warehouse_item 
@@ -125,7 +140,11 @@ class StockAdjustment < ActiveRecord::Base
   def unconfirm
     return if not self.is_confirmed? 
     
-    reverse_adjustment_quantity = -1*diff  
+    reverse_adjustment_quantity = -1*diff 
+    # puts "initial item ready : #{item.ready}" 
+    # puts "initial wh_item ready: #{warehouse_item.ready}"
+    
+    # puts "reverse adjusemtnet: #{ reverse_adjustment_quantity}"
     final_item_quantity = item.ready  + reverse_adjustment_quantity
     final_warehouse_item_quantity = warehouse_item.ready  + reverse_adjustment_quantity
     
@@ -136,9 +155,11 @@ class StockAdjustment < ActiveRecord::Base
       return self 
     end
     
+    
+    self.stock_mutation.delete_object
+    
     self.is_confirmed = false 
-    if self.save 
-      self.stock_mutation.delete_object 
-    end
+    self.save 
+    
   end
 end
