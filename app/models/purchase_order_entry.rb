@@ -1,11 +1,14 @@
 class PurchaseOrderEntry < ActiveRecord::Base
   has_one :stock_mutation,  :as => :stock_mutation_source
+  belongs_to :purchase_order 
+  belongs_to :item 
   
   validates_presence_of :quantity, :purchase_order_id, :item_id 
   
   validate :valid_quantity
   validate :valid_item_id
   validate :valid_purchase_order_id 
+
   
   def all_fields_present?
     quantity.present? and 
@@ -37,7 +40,7 @@ class PurchaseOrderEntry < ActiveRecord::Base
     return if not self.all_fields_present? 
     
     begin
-       po = PurchaseOrder.find item_id   
+       po = PurchaseOrder.find purchase_order_id   
        if po.is_confirmed? 
          self.errors.add(:purchase_order_id, "PO sudah di konfirmasi. tidak bisa menambah item")
          return self 
@@ -59,6 +62,10 @@ class PurchaseOrderEntry < ActiveRecord::Base
   end
   
   def update_object( params ) 
+    if self.is_confirmed?
+      self.errors.add(:generic_errors, "Sudah dikonfirmasi")
+      return self 
+    end
     self.quantity          = params[:quantity]
     self.purchase_order_id = params[:purchase_order_id]
     self.item_id           = params[:item_id]
@@ -86,6 +93,13 @@ class PurchaseOrderEntry < ActiveRecord::Base
     end
   end
   
+  def warehouse_item
+    WarehouseItem.find_or_create_object( 
+      :warehouse_id => self.purchase_order.warehouse_id , 
+      :item_id => self.item_id 
+    )
+  end
+  
   def can_be_unconfirmed?
     reverse_adjustment_quantity = -1*quantity  
     
@@ -103,14 +117,18 @@ class PurchaseOrderEntry < ActiveRecord::Base
   end
   
   def unconfirm 
+    # puts "Gonna unconfirm poe"
     return if not self.is_confirmed? 
     
+    # puts "it is confirmed, hence will move forward"
     return self if not self.can_be_unconfirmed? 
     
+    # puts "can be unconfirmed"
     
     self.stock_mutation.delete_object 
     self.is_confirmed = false
     self.save 
+
   end
   
   

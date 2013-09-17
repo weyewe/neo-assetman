@@ -5,6 +5,7 @@ class Item < ActiveRecord::Base
   # stock mutation sources 
   has_many :stock_adjustments 
   has_many :stock_mutations
+  has_many :purchase_order_entries 
   
   validates_uniqueness_of :name, :code 
   

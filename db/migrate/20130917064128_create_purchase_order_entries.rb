@@ -5,6 +5,9 @@ class CreatePurchaseOrderEntries < ActiveRecord::Migration
       t.integer :quantity 
       t.integer :item_id 
       
+      t.boolean :is_confirmed, :default => false 
+      t.datetime :confirmed_at 
+      t.string :code 
 
       t.timestamps
     end

@@ -118,14 +118,14 @@ class StockMutation < ActiveRecord::Base
 =end
   def self.create_purchase_order_entry_stock_mutation( poe)
     warehouse_item = WarehouseItem.find_or_create_object(
-      :warehouse_id => poe.po.warehouse_id , 
+      :warehouse_id => poe.purchase_order.warehouse_id , 
       :item_id => poe.item_id 
     ) 
     
     new_object = self.new 
     new_object.stock_mutation_source_type = poe.class.to_s
     new_object.stock_mutation_source_id = poe.id 
-    new_object.warehouse_id = poe.po.warehouse_id 
+    new_object.warehouse_id = poe.purchase_order.warehouse_id 
     new_object.warehouse_item_id = warehouse_item.id 
     new_object.item_id = poe.item_id 
     

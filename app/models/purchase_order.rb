@@ -6,7 +6,7 @@ class PurchaseOrder < ActiveRecord::Base
   validates_presence_of :supplier_id , :warehouse_id
   
   validate :valid_supplier_id 
-  validate :vaild_warehouse_id 
+  validate :valid_warehouse_id 
   
   def all_fields_present?
     supplier_id.present? and 
@@ -48,6 +48,10 @@ class PurchaseOrder < ActiveRecord::Base
   end
   
   def update_object(params)
+    if self.is_confirmed?
+      self.errors.add(:generic_errors, "Sudah konfirmasi, tidak bisa update")
+      return self 
+    end
     self.supplier_id = params[:supplier_id]
     self.purchased_at = params[:purchased_at]
     self.warehouse_id = params[:warehouse_id ] 
@@ -60,6 +64,11 @@ class PurchaseOrder < ActiveRecord::Base
     if self.is_confirmed?
       self.errors.add(:generic_errors, "Sudah dikonfirmasi")
       return self
+    end
+    
+    if self.purchase_order_entries.count != 0
+      self.errors.add(:generic_errors, "Sudah ada purchase order entry")
+      return self 
     end
     
     self.purchase_order_entries.each {|x| x.delete_object}
@@ -93,9 +102,10 @@ class PurchaseOrder < ActiveRecord::Base
       end
     end
 
-    self.purchase_order_entries.each {|x| x.unconfirm }
+    
     self.is_confirmed = false 
     self.save
+    self.purchase_order_entries.each {|x| x.unconfirm }
   end
   
 end
