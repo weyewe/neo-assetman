@@ -3,6 +3,8 @@ class PurchaseOrderEntry < ActiveRecord::Base
   belongs_to :purchase_order 
   belongs_to :item 
   
+  has_many :purchase_receival_entries
+  
   validates_presence_of :quantity, :purchase_order_id, :item_id 
   
   validate :valid_quantity
@@ -84,7 +86,10 @@ class PurchaseOrderEntry < ActiveRecord::Base
     new_object.purchase_order_id = params[:purchase_order_id]
     new_object.item_id           = params[:item_id]
     
-    new_object.save 
+    if new_object.save 
+      new_object.pending_receival = new_object.quantity
+      new_object.save 
+    end
     return new_object
   end
   
@@ -97,7 +102,10 @@ class PurchaseOrderEntry < ActiveRecord::Base
     self.purchase_order_id = params[:purchase_order_id]
     self.item_id           = params[:item_id]
     
-    self.save 
+    if self.save 
+      self.pending_receival = self.quantity
+      self.save 
+    end
     return self 
   end
   
@@ -106,6 +114,8 @@ class PurchaseOrderEntry < ActiveRecord::Base
       self.errors.add(:generic_errors, "Sudah dikonfirmasi")
       return self 
     end
+    
+
     
     self.destroy 
   end
@@ -157,6 +167,11 @@ class PurchaseOrderEntry < ActiveRecord::Base
   def unconfirm 
     # puts "Gonna unconfirm poe"
     return if not self.is_confirmed? 
+    
+    if self.purchase_receival_entries.count != 0
+      self.errors.add(:generic_errors, "Tidak bisa unconfirm karena sudah ada penerimaan barang")
+      return self 
+    end
     
     # puts "it is confirmed, hence will move forward"
     return self if not self.can_be_unconfirmed? 

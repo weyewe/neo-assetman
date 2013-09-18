@@ -11,6 +11,8 @@ class PurchaseReceivalEntry < ActiveRecord::Base
   validate :valid_purchase_receival_id
   validate :valid_purchase_order_entry_id 
   validate :valid_quantity
+  validate :uniq_purchase_order_entry_id 
+  validate :confirmed_purchase_order_entry
   
   def all_fields_present?
     purchase_receival_id.present? and
@@ -33,9 +35,9 @@ class PurchaseReceivalEntry < ActiveRecord::Base
     return if not self.all_fields_present? 
     
     begin
-       Supplier.find supplier_id   
+       PurchaseOrderEntry.find purchase_order_entry_id   
     rescue
-      self.errors.add(:supplier_id, "Harus memilih supplier") 
+      self.errors.add(:purchase_order_entry_id, "Harus memilih item dari purchase order") 
       return self 
     end
   end
@@ -47,6 +49,43 @@ class PurchaseReceivalEntry < ActiveRecord::Base
       self.errors.add(:quantity, "Harus di antara 0 dan #{ purchase_order_entry.pending_receival}")
     end
   end
+  
+  def uniq_purchase_order_entry_id
+    return if not all_fields_present?
+    
+    begin
+      
+      parent = self.purchase_receival
+      purchase_receival_entry_count = PurchaseReceivalEntry.where(
+        :purchase_order_entry_id => self.purchase_order_entry_id,
+        :purchase_receival_id => parent.id  
+      ).count 
+
+      purchase_order_entry = self.purchase_order_entry 
+      purchase_receival = self.purchase_receival
+      purchase_order = purchase_order_entry.purchase_order 
+      msg = "Item #{purchase_order_entry.item.name} dari pemesanan #{purchase_order.code} sudah terdaftar di penerimaan ini"
+
+      if not self.persisted? and purchase_receival_entry_count != 0
+        errors.add(:purchase_order_entry_id , msg ) 
+      elsif self.persisted? and not self.purchase_order_entry_id_changed? and purchase_receival_entry_count > 1 
+        errors.add(:purchase_order_entry_id , msg ) 
+      elsif self.persisted? and  self.purchase_order_entry_id_changed? and purchase_receival_entry_count  != 0 
+        errors.add(:purchase_order_entry_id , msg )
+      end
+    rescue
+    end
+  end
+  
+  def confirmed_purchase_order_entry
+    return if not all_fields_present? 
+    
+    if not purchase_order_entry.is_confirmed? 
+      self.errors.add(:purchase_order_entry_id, "Belum di konfirmasi")
+      return self 
+    end
+  end
+  
   
   def self.create_object( params ) 
     new_object = self.new 
@@ -101,7 +140,7 @@ class PurchaseReceivalEntry < ActiveRecord::Base
   
   def item
     Item.where(
-      :item_id => self.purchase_order_entry.item_id 
+      :id => self.purchase_order_entry.item_id 
     ).first 
   end
   

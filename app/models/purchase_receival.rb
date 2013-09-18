@@ -2,14 +2,14 @@ class PurchaseReceival < ActiveRecord::Base
   belongs_to :supplier 
   has_many :purchase_receival_entries
   
-  validates_presence_of :purchased_at, :supplier_id, :code
+  validates_presence_of  :supplier_id, :code, :received_at
   validates_uniqueness_of :code 
   
   validate :valid_supplier_id
   validate :valid_code
   
   def all_fields_present?
-    purchased_at.present? and
+    received_at.present? and
     supplier_id.present? and 
     code.present?
   end
@@ -36,7 +36,7 @@ class PurchaseReceival < ActiveRecord::Base
   def self.create_object( params )
     new_object = self.new
     new_object.supplier_id = params[:supplier_id]
-    new_object.purchase_at = params[:purchased_at]
+    new_object.received_at = params[:received_at]
     new_object.code = params[:code]
     
     new_object.save
@@ -50,7 +50,7 @@ class PurchaseReceival < ActiveRecord::Base
     end
     
     self.supplier_id = params[:supplier_id]
-    self.purchase_at = params[:purchased_at]
+    self.received_at = params[:received_at]
     self.code = params[:code]
 
     self.save

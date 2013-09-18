@@ -27,7 +27,7 @@ ActiveRecord::Schema.define(version: 20130917161407) do
   create_table "purchase_order_entries", force: true do |t|
     t.integer  "purchase_order_id"
     t.integer  "quantity",          default: 0
-    t.integer  "received",          default: 0
+    t.integer  "pending_receival"
     t.integer  "item_id"
     t.boolean  "is_confirmed",      default: false
     t.datetime "confirmed_at"
@@ -49,6 +49,12 @@ ActiveRecord::Schema.define(version: 20130917161407) do
   end
 
   create_table "purchase_receival_entries", force: true do |t|
+    t.integer  "purchase_receival_id"
+    t.integer  "quantity",                default: 0
+    t.integer  "purchase_order_entry_id"
+    t.boolean  "is_confirmed",            default: false
+    t.datetime "confirmed_at"
+    t.string   "code"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -56,6 +62,10 @@ ActiveRecord::Schema.define(version: 20130917161407) do
   create_table "purchase_receivals", force: true do |t|
     t.integer  "supplier_id"
     t.text     "description"
+    t.datetime "received_at"
+    t.boolean  "is_confirmed", default: false
+    t.string   "code"
+    t.datetime "confirmed_at"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
