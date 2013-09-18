@@ -45,7 +45,7 @@ class PurchaseReceivalEntry < ActiveRecord::Base
   def valid_quantity
     return if not all_fields_present?
     
-    if quantity < 0 or quantity > purchase_order_entry.pending_receival
+    if quantity <= 0 or quantity > purchase_order_entry.pending_receival
       self.errors.add(:quantity, "Harus di antara 0 dan #{ purchase_order_entry.pending_receival}")
     end
   end
@@ -119,6 +119,17 @@ class PurchaseReceivalEntry < ActiveRecord::Base
     self.destroy 
   end
   
+  def can_be_confirmed?
+    self.valid_quantity 
+    
+    if self.errors.size != 0 
+      self.errors.add(:generic_errors, self.errors.messages[:quantity].first)
+      return false
+    end
+    
+    return true 
+  end
+  
   def confirm
     return if self.is_confirmed? 
     
@@ -126,7 +137,7 @@ class PurchaseReceivalEntry < ActiveRecord::Base
     self.confirmed_at = DateTime.now 
     if self.save 
       StockMutation.create_purchase_receival_entry_stock_mutations( self ) 
-      purchase_order_entry.update_pending_receival( self.quantity )
+      purchase_order_entry.update_pending_receival_and_received( self.quantity )
     end
   end
   
@@ -148,6 +159,10 @@ class PurchaseReceivalEntry < ActiveRecord::Base
   #   quantity - received
   # end
   
+=begin
+  effect of purchase return confirm: received add , pending_receival deduct
+  effect of purchase return unconfirm: received deduct, pending_receival add 
+=end
   def can_be_unconfirmed?
     reverse_adjustment_quantity = -1*quantity  
     
@@ -157,10 +172,19 @@ class PurchaseReceivalEntry < ActiveRecord::Base
     final_warehouse_item_ready_quantity = warehouse_item.ready  + reverse_adjustment_quantity
     
     if final_item_ready_quantity < 0 or final_warehouse_item_ready_quantity < 0 
+      # another condition: purchase_order_entry.pending_receival > ordered_quantity
       msg = "Tidak bisa unconfirm karena akan menyebabkan jumlah #{item.name} pending receival menjadi #{final_item_ready_quantity} " + 
                 " dan jumlah item gudang menjadi :#{final_warehouse_item_ready_quantity}"
       self.errors.add(:generic_errors, msg )
       return false 
+    end
+    
+    final_purchase_order_entry_received = purchase_order_entry.pending_receival + reverse_adjustment_quantity 
+    if final_purchase_order_entry_received < 0 
+      msg = "Tidak bisa unconfirm karena akan menyebabkan jumlah #{item.name} yang diterima menjadi " + 
+              " lebih kecil dari 0 (#{final_purchase_order_entry_pending_receival})"
+      self.errors.add(:generic_errors, msg )
+      return false
     end
     
     return true 
@@ -176,7 +200,7 @@ class PurchaseReceivalEntry < ActiveRecord::Base
     self.stock_mutations.each{|x| x.delete_object  }
     self.is_confirmed = false
     if self.save
-      purchase_order_entry.update_pending_receival( -1*self.quantity )
+      purchase_order_entry.update_pending_receival_and_received( -1*self.quantity )
     end
   end
 end

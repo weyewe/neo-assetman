@@ -4,6 +4,7 @@ class CreatePurchaseOrderEntries < ActiveRecord::Migration
       t.integer :purchase_order_id 
       t.integer :quantity , :default => 0 # quantity ordered
       t.integer :pending_receival
+      t.integer :received, :default => 0 
       
       t.integer :item_id 
       

@@ -187,4 +187,55 @@ class StockMutation < ActiveRecord::Base
     self.create_purchase_receival_entry_deduct_pending_receival(sms)
     self.create_purchase_receival_entry_add_ready( sms ) 
   end
+  
+=begin
+  Purchase Return
+=end
+
+  def self.create_purchase_receival_entry_add_pending_receival(sms)
+    warehouse_item = WarehouseItem.find_or_create_object(
+      :warehouse_id => sms.purchase_order_entry.purchase_order.warehouse_id , 
+      :item_id => sms.purchase_order_entry.item_id 
+    )
+    new_object = self.new 
+    new_object.stock_mutation_source_type = sms.class.to_s
+    new_object.stock_mutation_source_id = sms.id 
+    new_object.warehouse_id = sms.purchase_order_entry.purchase_order.warehouse_id 
+    new_object.warehouse_item_id = warehouse_item.id 
+    new_object.item_id =  sms.purchase_order_entry.item_id 
+    
+    new_object.quantity = sms.quantity 
+    new_object.mutated_at = sms.confirmed_at 
+    new_object.case = STOCK_MUTATION_CASE[:pending_receival]
+    
+    if new_object.save 
+      new_object.update_quantity( new_object.quantity )
+    end
+  end
+  
+  def self.create_purchase_receival_entry_deduct_ready(sms)
+    warehouse_item = WarehouseItem.find_or_create_object(
+      :warehouse_id => sms.purchase_order_entry.purchase_order.warehouse_id , 
+      :item_id => sms.purchase_order_entry.item_id 
+    )
+    new_object = self.new 
+    new_object.stock_mutation_source_type = sms.class.to_s
+    new_object.stock_mutation_source_id = sms.id 
+    new_object.warehouse_id = sms.purchase_order_entry.purchase_order.warehouse_id 
+    new_object.warehouse_item_id = warehouse_item.id 
+    new_object.item_id =  sms.purchase_order_entry.item_id 
+    
+    new_object.quantity = -1*sms.quantity 
+    new_object.mutated_at = sms.confirmed_at 
+    new_object.case = STOCK_MUTATION_CASE[:ready]
+    
+    if new_object.save 
+      new_object.update_quantity( new_object.quantity )
+    end
+  end
+
+  def self.create_purchase_return_entry_stock_mutations(sms)
+    self.create_purchase_receival_entry_add_pending_receival(sms)
+    self.create_purchase_receival_entry_deduct_ready( sms )
+  end
 end

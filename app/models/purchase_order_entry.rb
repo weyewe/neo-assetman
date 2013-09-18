@@ -70,7 +70,7 @@ class PurchaseOrderEntry < ActiveRecord::Base
     
     begin
        po = PurchaseOrder.find purchase_order_id   
-       if po.is_confirmed? 
+       if not self.persisted? and po.is_confirmed? 
          self.errors.add(:purchase_order_id, "PO sudah di konfirmasi. tidak bisa menambah item")
          return self 
        end
@@ -142,6 +142,14 @@ class PurchaseOrderEntry < ActiveRecord::Base
   # end
   
   def can_be_unconfirmed?
+    
+    if self.purchase_receival_entries.count != 0
+      self.errors.add(:generic_errors, "Tidak bisa unconfirm karena sudah ada penerimaan barang")
+      return false 
+    end
+
+      
+      
     reverse_adjustment_quantity = -1*quantity  
     
     # puts "initial item.pending_receival: #{item.pending_receival}"
@@ -159,19 +167,25 @@ class PurchaseOrderEntry < ActiveRecord::Base
     return true 
   end
   
-  def update_pending_receival( diff ) 
-    self.pending_receival +=  diff 
+  def update_pending_receival_and_received( diff ) 
+    # puts "Inside update_pending_receival_and_received"
+    # puts "diff : #{diff}"
+    self.pending_receival -=  diff 
+    self.received += diff 
     self.save
+    
+    # puts "total error: #{self.errors.size}"
+    
+    # self.errors.messages.each do |msg|
+    #   puts "msg: #{msg}"
+    # end
   end
   
   def unconfirm 
     # puts "Gonna unconfirm poe"
     return if not self.is_confirmed? 
     
-    if self.purchase_receival_entries.count != 0
-      self.errors.add(:generic_errors, "Tidak bisa unconfirm karena sudah ada penerimaan barang")
-      return self 
-    end
+   
     
     # puts "it is confirmed, hence will move forward"
     return self if not self.can_be_unconfirmed? 

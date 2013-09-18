@@ -121,8 +121,12 @@ describe PurchaseReceivalEntry do
             :warehouse_id => @wh_1.id ,
             :item_id => @item_1.id 
           )
-          
+          @poe.reload 
           @item_1.reload 
+          
+          @initial_poe_pending_receival = @poe.pending_receival
+          @initial_poe_received = @poe.received 
+          
           @initial_item_1_ready = @item_1.ready 
           @initial_wh_item_1_ready = @wh_item_1.ready 
           @initial_item_1_pending_receival = @item_1.pending_receival
@@ -134,7 +138,23 @@ describe PurchaseReceivalEntry do
           @prec_e.reload 
           @item_1.reload 
           @wh_item_1.reload
+          @poe.reload 
           
+        end
+        
+        it 'should update purchase_order_entry.pending receival and received' do
+          @po.is_confirmed.should be_true 
+          final_poe_pending_receival = @poe.pending_receival
+          final_poe_received = @poe.received 
+          # puts "quantity_ordered: #{@poe.quantity}"
+          # puts "final_poe_pending_receival: #{final_poe_pending_receival}"
+          # puts "final_poe_received: #{final_poe_received}"
+          
+          diff_poe_pending_receival  = final_poe_pending_receival - @initial_poe_pending_receival
+          diff_poe_received = final_poe_received - @initial_poe_received
+          
+          diff_poe_pending_receival.should == -1*@received_quantity 
+          diff_poe_received.should == @received_quantity
         end
         
         it 'should update ready item' do

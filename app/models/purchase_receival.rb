@@ -80,6 +80,13 @@ class PurchaseReceival < ActiveRecord::Base
     end
     
     
+    self.purchase_receival_entries.each do |pre|
+      if not pre.can_be_confirmed? 
+        self.errors.add(:generic_errors, pre.errors.messages[:generic_errors].first)
+        return self
+      end
+    end
+    
     self.purchase_receival_entries.each {|x| x.confirm }
     
     
