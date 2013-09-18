@@ -29,7 +29,7 @@ describe WarehouseItem do
       :item_id => @item_1.id 
     ).count.should == 0 
     
-    puts "THE FIRST CALL"
+    # puts "THE FIRST CALL"
     object1 = WarehouseItem.find_or_create_object(
       :warehouse_id => @wh_1.id , 
       :item_id => @item_1.id 
@@ -38,7 +38,7 @@ describe WarehouseItem do
     
     object1.should be_valid 
     
-    puts "THE second CALL"
+    # puts "THE second CALL"
     object2 = WarehouseItem.find_or_create_object(
       :warehouse_id => @wh_1.id , 
       :item_id => @item_1.id 

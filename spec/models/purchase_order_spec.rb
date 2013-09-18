@@ -15,6 +15,8 @@ describe PurchaseOrder do
     @supplier = Supplier.create_object(
       :name => "Supplier 1 "
     )
+    
+    @purchased_at = DateTime.new(2012,10,5,0,0,0)
   end
   
   it 'should be allowed to create purchase order' do
@@ -22,7 +24,8 @@ describe PurchaseOrder do
       :supplier_id => @supplier.id ,
       :warehouse_id => @wh_1.id ,
       :description => "The description",
-      :code => "PO1234"
+      :code => "PO1234",
+      :purchased_at => @purchased_at
     )
     @po.errors.messages.each do |msg|
       puts "The message: #{msg}"
@@ -35,7 +38,8 @@ describe PurchaseOrder do
       :supplier_id => @supplier.id ,
       :warehouse_id => 0,
       :description => "The description",
-      :code => "PO1234"
+      :code => "PO1234",
+      :purchased_at => @purchased_at
     )
     
     @po.should_not be_valid
@@ -48,7 +52,8 @@ describe PurchaseOrder do
         :supplier_id => @supplier.id ,
         :warehouse_id => @wh_1.id ,
         :description => "The description",
-        :code => "PO1234"
+        :code => "PO1234",
+        :purchased_at => @purchased_at
       )
        
     end
@@ -119,6 +124,7 @@ describe PurchaseOrder do
           
           diff = @final_item_1_pending_receival - @initial_item_1_pending_receival
           diff.should == @quantity 
+          @item_1.pending_receival.should == @quantity
         end
         
         
@@ -127,7 +133,8 @@ describe PurchaseOrder do
             :supplier_id => @supplier.id ,
             :warehouse_id => @wh_1.id ,
             :description => "The description 2",
-            :code => "PO1234"
+            :code => "PO1234",
+            :purchased_at => @purchased_at
           )
           @po.errors.size.should_not == 0 
         end
@@ -139,12 +146,18 @@ describe PurchaseOrder do
         end
         
         
+        
         context "unconfirm" do
           before(:each) do
+            # this is important. or else, will call the old data (thanks to rails DB caching)
+            @po.reload
             @po.unconfirm
           end
           
           it 'should unconfirm the po' do
+            @po.errors.messages.each do |msg|
+              puts "3321 the msg: #{msg}"
+            end
             @po.is_confirmed.should be_false 
           end
           
@@ -153,7 +166,8 @@ describe PurchaseOrder do
               :supplier_id => @supplier.id ,
               :warehouse_id => @wh_1.id ,
               :description => "The description 2",
-              :code => "PO1234"
+              :code => "PO1234",
+              :purchased_at => @purchased_at
             )
             @po.errors.size.should == 0
           end

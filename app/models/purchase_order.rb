@@ -3,7 +3,7 @@ class PurchaseOrder < ActiveRecord::Base
   belongs_to :supplier 
   
   
-  validates_presence_of :supplier_id , :warehouse_id, :code 
+  validates_presence_of :supplier_id , :warehouse_id, :code , :purchased_at 
   validates_uniqueness_of :code 
   
   validate :valid_supplier_id 
@@ -109,7 +109,10 @@ class PurchaseOrder < ActiveRecord::Base
     
     self.purchase_order_entries.each do |poe|
       if not poe.can_be_unconfirmed?
-        self.errors.add(:generic_errors, poe.errors[:generic_errors])
+        # self.errors.add(:test_error, "Awesome")
+        # puts self.errors.messages[:test_error].first
+        # puts self.errors.messages[:awesome_error].first
+        self.errors.add(:generic_errors, poe.errors.messages[:generic_errors].first)
         return self 
       end
     end

@@ -127,9 +127,15 @@ class PurchaseOrderEntry < ActiveRecord::Base
     )
   end
   
+  # def pending_receival
+  #   quantity - received
+  # end
+  
   def can_be_unconfirmed?
     reverse_adjustment_quantity = -1*quantity  
     
+    # puts "initial item.pending_receival: #{item.pending_receival}"
+    # puts "the reverse adjusetment: #{reverse_adjustment_quantity}"
     final_item_quantity = item.pending_receival  + reverse_adjustment_quantity
     final_warehouse_item_quantity = warehouse_item.pending_receival  + reverse_adjustment_quantity
     
@@ -141,6 +147,11 @@ class PurchaseOrderEntry < ActiveRecord::Base
     end
     
     return true 
+  end
+  
+  def update_pending_receival( diff ) 
+    self.pending_receival +=  diff 
+    self.save
   end
   
   def unconfirm 
@@ -155,7 +166,6 @@ class PurchaseOrderEntry < ActiveRecord::Base
     self.stock_mutation.delete_object 
     self.is_confirmed = false
     self.save 
-
   end
   
   

@@ -16,11 +16,16 @@ describe PurchaseOrderEntry do
       :name => "Supplier 1 "
     )
     
+    
+    @purchased_at = DateTime.new(2012,10,5,0,0,0)
+    
+    
     @po = PurchaseOrder.create_object(
       :supplier_id => @supplier.id ,
       :warehouse_id => @wh_1.id ,
       :description => "The description",
-      :code => "PO1234"
+      :code => "PO1234",
+      :purchased_at => @purchased_at
     )
   end
 
@@ -130,6 +135,7 @@ describe PurchaseOrderEntry do
       context "unconfirm" do
         before(:each) do
           # puts "=========> Gonna unconfirm po"
+          @po.reload
           @po.unconfirm
           @poe.reload
           
