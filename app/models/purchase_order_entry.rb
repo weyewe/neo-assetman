@@ -98,6 +98,9 @@ class PurchaseOrderEntry < ActiveRecord::Base
       self.errors.add(:generic_errors, "Sudah dikonfirmasi")
       return self 
     end
+    
+   
+    
     self.quantity          = params[:quantity]
     self.purchase_order_id = params[:purchase_order_id]
     self.item_id           = params[:item_id]
@@ -147,13 +150,16 @@ class PurchaseOrderEntry < ActiveRecord::Base
       self.errors.add(:generic_errors, "Tidak bisa unconfirm karena sudah ada penerimaan barang")
       return false 
     end
+    
+    if self.purchase_return_entries.count != 0 
+      self.errors.add(:generic_errors, "Tidak bisa unconfirm karena sudah ada pengembalian barang")
+      return false
+    end
 
       
       
     reverse_adjustment_quantity = -1*quantity  
-    
-    # puts "initial item.pending_receival: #{item.pending_receival}"
-    # puts "the reverse adjusetment: #{reverse_adjustment_quantity}"
+     
     final_item_quantity = item.pending_receival  + reverse_adjustment_quantity
     final_warehouse_item_quantity = warehouse_item.pending_receival  + reverse_adjustment_quantity
     

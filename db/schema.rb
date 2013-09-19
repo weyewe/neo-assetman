@@ -11,7 +11,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130918031606) do
+ActiveRecord::Schema.define(version: 20130919025936) do
+
+  create_table "customers", force: true do |t|
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "items", force: true do |t|
     t.string   "name"
@@ -89,6 +95,52 @@ ActiveRecord::Schema.define(version: 20130918031606) do
     t.boolean  "is_confirmed", default: false
     t.string   "code"
     t.datetime "confirmed_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "sales_deliveries", force: true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "sales_delivery_entries", force: true do |t|
+    t.integer  "sales_order_entry_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "sales_order_entries", force: true do |t|
+    t.integer  "sales_order_id"
+    t.integer  "quantity",         default: 0
+    t.integer  "pending_delivery"
+    t.integer  "delivered",        default: 0
+    t.integer  "item_id"
+    t.boolean  "is_confirmed",     default: false
+    t.datetime "confirmed_at"
+    t.string   "code"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "sales_orders", force: true do |t|
+    t.integer  "customer_id"
+    t.datetime "sold_at"
+    t.text     "description"
+    t.boolean  "is_confirmed", default: false
+    t.datetime "confirmed_at"
+    t.string   "code"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "sales_return_entries", force: true do |t|
+    t.integer  "sales_order_entry_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "sales_returns", force: true do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
   end

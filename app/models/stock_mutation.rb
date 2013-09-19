@@ -30,13 +30,13 @@ class StockMutation < ActiveRecord::Base
     stock_mutation_case = self.case 
     
     if stock_mutation_case == STOCK_MUTATION_CASE[:ready]
-      warehouse_item.update_ready( diff  )
+      warehouse_item.update_ready( diff  ) if not warehouse_item_id.nil?        
       item.update_ready( diff  )
     elsif stock_mutation_case == STOCK_MUTATION_CASE[:pending_receival]
-      warehouse_item.update_pending_receival( diff  )
+      warehouse_item.update_pending_receival( diff  ) if not warehouse_item_id.nil? 
       item.update_pending_receival( diff  )
     elsif stock_mutation_case == STOCK_MUTATION_CASE[:pending_delivery]
-      warehouse_item.update_pending_delivery( diff  )
+      warehouse_item.update_pending_delivery( diff  ) if not warehouse_item_id.nil?
       item.update_pending_delivery( diff  )
     end
   end
@@ -237,5 +237,25 @@ class StockMutation < ActiveRecord::Base
   def self.create_purchase_return_entry_stock_mutations(sms)
     self.create_purchase_receival_entry_add_pending_receival(sms)
     self.create_purchase_receival_entry_deduct_ready( sms )
+  end
+  
+=begin
+  SalesOrder
+=end
+  def self.create_sales_order_entry_stock_mutation(sms)\
+    new_object = self.new 
+    new_object.stock_mutation_source_type = sms.class.to_s
+    new_object.stock_mutation_source_id = sms.id 
+    new_object.warehouse_id = nil 
+    new_object.warehouse_item_id =  nil 
+    new_object.item_id = sms.item_id 
+    
+    new_object.quantity = sms.quantity 
+    new_object.mutated_at = sms.confirmed_at 
+    new_object.case = STOCK_MUTATION_CASE[:pending_delivery]
+    
+    if new_object.save 
+      new_object.update_quantity( new_object.quantity )
+    end
   end
 end
