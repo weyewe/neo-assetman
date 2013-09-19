@@ -49,7 +49,8 @@ class PurchaseReceivalEntry < ActiveRecord::Base
   def valid_quantity
     return if not all_fields_present?
     
-    if quantity <= 0 or quantity > purchase_order_entry.pending_receival
+    if quantity <= 0 or 
+        ( not self.is_confirmed? and quantity > purchase_order_entry.pending_receival ) 
       self.errors.add(:quantity, "Harus di antara 0 dan #{ purchase_order_entry.pending_receival}")
     end
   end

@@ -62,7 +62,8 @@ class SalesDeliveryEntry < ActiveRecord::Base
   def valid_quantity
     return if not all_fields_present?
     
-    if quantity <= 0 or quantity > sales_order_entry.pending_delivery
+    if quantity <= 0 or 
+        ( not self.is_confirmed? and quantity > sales_order_entry.pending_delivery ) 
       self.errors.add(:quantity, "Harus di antara 0 dan #{ sales_order_entry.pending_delivery}")
       return self 
     end

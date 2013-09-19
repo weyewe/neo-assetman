@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130919095430) do
+ActiveRecord::Schema.define(version: 20130919130300) do
 
   create_table "customers", force: true do |t|
     t.string   "name"
@@ -212,24 +212,35 @@ ActiveRecord::Schema.define(version: 20130919095430) do
     t.datetime "updated_at"
   end
 
-  create_table "warehouse_item_mutations", force: true do |t|
-    t.integer  "source_warehouse_id"
-    t.integer  "target_warehouse_id"
-    t.integer  "quantity"
-    t.integer  "item_id"
-    t.boolean  "is_confirmed",        default: false
-    t.string   "code"
-    t.datetime "confirmed_at"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "warehouse_items", force: true do |t|
     t.integer  "item_id"
     t.integer  "warehouse_id"
     t.integer  "ready",            default: 0
     t.integer  "pending_receival", default: 0
     t.integer  "pending_delivery", default: 0
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "warehouse_mutation_entries", force: true do |t|
+    t.integer  "warehouse_mutation_id"
+    t.integer  "quantity"
+    t.integer  "item_id"
+    t.boolean  "is_confirmed",          default: false
+    t.string   "code"
+    t.datetime "confirmed_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "warehouse_mutations", force: true do |t|
+    t.integer  "source_warehouse_id"
+    t.integer  "target_warehouse_id"
+    t.datetime "mutated_at"
+    t.text     "description"
+    t.boolean  "is_confirmed",        default: false
+    t.string   "code"
+    t.datetime "confirmed_at"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

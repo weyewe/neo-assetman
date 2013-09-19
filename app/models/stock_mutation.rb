@@ -70,14 +70,14 @@ class StockMutation < ActiveRecord::Base
 
   def self.create_deduction_from_source_warehouse( sms ) 
     warehouse_item = WarehouseItem.find_or_create_object(
-      :warehouse_id => sms.source_warehouse_id , 
+      :warehouse_id => sms.warehouse_mutation.source_warehouse_id , 
       :item_id => sms.item_id 
     ) 
     
     new_object = self.new 
     new_object.stock_mutation_source_type = sms.class.to_s
     new_object.stock_mutation_source_id = sms.id 
-    new_object.warehouse_id = sms.source_warehouse_id 
+    new_object.warehouse_id = sms.warehouse_mutation.source_warehouse_id 
     new_object.warehouse_item_id = warehouse_item.id 
     new_object.item_id = sms.item_id 
     
@@ -92,14 +92,14 @@ class StockMutation < ActiveRecord::Base
   
   def self.create_addition_to_target_warehouse( sms )
     warehouse_item = WarehouseItem.find_or_create_object(
-      :warehouse_id => sms.target_warehouse_id , 
+      :warehouse_id => sms.warehouse_mutation.target_warehouse_id , 
       :item_id => sms.item_id 
     ) 
     
     new_object = self.new 
     new_object.stock_mutation_source_type = sms.class.to_s
     new_object.stock_mutation_source_id = sms.id 
-    new_object.warehouse_id = sms.target_warehouse_id 
+    new_object.warehouse_id = sms.warehouse_mutation.target_warehouse_id 
     new_object.warehouse_item_id = warehouse_item.id 
     new_object.item_id = sms.item_id 
     
@@ -113,7 +113,7 @@ class StockMutation < ActiveRecord::Base
   end
   
   
-  def self.create_warehouse_item_mutation_stock_mutation( sms ) 
+  def self.create_warehouse_mutation_entry_stock_mutations( sms ) 
     self.create_deduction_from_source_warehouse(sms)
     self.create_addition_to_target_warehouse( sms ) 
   end
