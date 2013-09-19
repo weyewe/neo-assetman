@@ -43,11 +43,16 @@ class StockMutation < ActiveRecord::Base
   
   
   def self.create_stock_adjustment_mutation(sms)
+    warehouse_item = WarehouseItem.find_or_create_object(
+      :warehouse_id => sms.stock_adjustment.warehouse_id , 
+      :item_id => sms.item_id 
+    )
+    
     new_object = self.new 
     new_object.stock_mutation_source_type = sms.class.to_s
     new_object.stock_mutation_source_id = sms.id 
-    new_object.warehouse_id = sms.warehouse_id
-    new_object.warehouse_item_id = sms.warehouse_item_id 
+    new_object.warehouse_id = sms.stock_adjustment.warehouse_id
+    new_object.warehouse_item_id = warehouse_item.id 
     new_object.item_id = sms.item_id 
     
     new_object.quantity = sms.diff 
