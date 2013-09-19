@@ -74,7 +74,7 @@ class SalesDeliveryEntry < ActiveRecord::Base
     end
   end
   
-  def uniq_sales_order_entry_id  
+  def uniq_sales_delivery_entry_id  
     return if not all_fields_present?
     
     begin
@@ -168,7 +168,7 @@ class SalesDeliveryEntry < ActiveRecord::Base
   
   def warehouse_item
     WarehouseItem.find_or_create_object( 
-      :warehouse_id => self.sales_order_entry.sales_order.warehouse_id , 
+      :warehouse_id => self.sales_delivery.warehouse_id  , 
       :item_id => self.sales_order_entry.item_id 
     )
   end
@@ -188,7 +188,7 @@ class SalesDeliveryEntry < ActiveRecord::Base
   effect of purchase return unconfirm: received deduct, pending_receival add 
 =end
   def can_be_unconfirmed?
-    reverse_adjustment_quantity = -1*quantity  
+    reverse_adjustment_quantity = quantity  
     
     # puts "initial item.pending_receival: #{item.pending_receival}"
     # puts "the reverse adjusetment: #{reverse_adjustment_quantity}"
@@ -203,10 +203,10 @@ class SalesDeliveryEntry < ActiveRecord::Base
       return false 
     end
     
-    final_sales_order_entry_received = sales_order_entry.pending_receival + reverse_adjustment_quantity 
-    if final_sales_order_entry_received < 0 
-      msg = "Tidak bisa unconfirm karena akan menyebabkan jumlah #{item.name} yang diterima menjadi " + 
-              " lebih kecil dari 0 (#{final_sales_order_entry_pending_receival})"
+    final_pending_delivery = sales_order_entry.pending_delivery + reverse_adjustment_quantity 
+    if final_pending_delivery < sales_order_entry.quantity
+      msg = "Tidak bisa unconfirm karena akan menyebabkan jumlah #{item.name} yang belum dikirim menjadi " + 
+              " lebih besar dari yang dipesan"
       self.errors.add(:generic_errors, msg )
       return false
     end

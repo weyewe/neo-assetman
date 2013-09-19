@@ -28,6 +28,17 @@ class SalesDelivery < ActiveRecord::Base
     end
   end
   
+  def valid_warehouse_id
+    return if not self.all_fields_present? 
+    
+    begin
+       Warehouse.find warehouse_id   
+    rescue
+      self.errors.add(:warehouse_id, "Harus memilih gudang") 
+      return self 
+    end
+  end
+  
   def valid_code 
     if code.present? and code.length == 0 
       self.errors.add(:code, "Kode penerimaan barang harus ada")

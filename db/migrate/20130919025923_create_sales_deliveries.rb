@@ -11,6 +11,8 @@ class CreateSalesDeliveries < ActiveRecord::Migration
       
       t.integer :warehouse_id 
       
+      t.integer :warehouse_id 
+      
 
       t.timestamps
     end

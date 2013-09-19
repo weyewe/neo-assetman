@@ -265,13 +265,13 @@ class StockMutation < ActiveRecord::Base
 
   def self.create_sales_delivery_entry_deduct_pending_delivery(sms)
     warehouse_item = WarehouseItem.find_or_create_object(
-      :warehouse_id => sms.delivery_order.warehouse_id  , 
+      :warehouse_id => sms.sales_delivery.warehouse_id  , 
       :item_id => sms.sales_order_entry.item_id 
     )
     new_object = self.new 
     new_object.stock_mutation_source_type = sms.class.to_s
     new_object.stock_mutation_source_id = sms.id 
-    new_object.warehouse_id =  sms.delivery_order.warehouse_id 
+    new_object.warehouse_id =  sms.sales_delivery.warehouse_id 
     new_object.warehouse_item_id =  warehouse_item.id 
     new_object.item_id =  sms.sales_order_entry.item_id 
     
@@ -286,13 +286,13 @@ class StockMutation < ActiveRecord::Base
   
   def self.create_sales_delivery_entry_deduct_ready(sms)
     warehouse_item = WarehouseItem.find_or_create_object(
-      :warehouse_id => sms.delivery_order.warehouse_id  , 
+      :warehouse_id => sms.sales_delivery.warehouse_id  , 
       :item_id => sms.sales_order_entry.item_id 
     )
     new_object = self.new 
     new_object.stock_mutation_source_type = sms.class.to_s
     new_object.stock_mutation_source_id = sms.id 
-    new_object.warehouse_id =  sms.delivery_order.warehouse_id 
+    new_object.warehouse_id =  sms.sales_delivery.warehouse_id 
     new_object.warehouse_item_id =  warehouse_item.id 
     new_object.item_id =  sms.sales_order_entry.item_id 
     

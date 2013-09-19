@@ -7,7 +7,6 @@ class CreateSalesDeliveryEntries < ActiveRecord::Migration
       
       t.integer :sales_order_entry_id 
       
-      t.integer :warehouse_id 
       
       t.boolean :is_confirmed, :default => false 
       t.datetime :confirmed_at 

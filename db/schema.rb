@@ -106,6 +106,7 @@ ActiveRecord::Schema.define(version: 20130919025936) do
     t.boolean  "is_confirmed", default: false
     t.string   "code"
     t.datetime "confirmed_at"
+    t.integer  "warehouse_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -114,7 +115,6 @@ ActiveRecord::Schema.define(version: 20130919025936) do
     t.integer  "sales_delivery_id"
     t.integer  "quantity",             default: 0
     t.integer  "sales_order_entry_id"
-    t.integer  "warehouse_id"
     t.boolean  "is_confirmed",         default: false
     t.datetime "confirmed_at"
     t.string   "code"
