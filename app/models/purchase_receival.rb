@@ -49,6 +49,12 @@ class PurchaseReceival < ActiveRecord::Base
       return self 
     end
     
+    if self.purchase_receival_entries.count != 0 and 
+      supplier_id != params[:supplier_id]
+      self.errors.add(:supplier_id, "Tidak boleh mengganti supplier. Sudah menerima item")
+      return self 
+    end
+    
     self.supplier_id = params[:supplier_id]
     self.received_at = params[:received_at]
     self.code = params[:code]

@@ -35,7 +35,11 @@ class PurchaseReceivalEntry < ActiveRecord::Base
     return if not self.all_fields_present? 
     
     begin
-       PurchaseOrderEntry.find purchase_order_entry_id   
+       poe = PurchaseOrderEntry.find purchase_order_entry_id   
+       if poe.purchase_order.supplier_id != self.purchase_receival.supplier_id
+         self.errors.add(:purchase_order_entry_id, "Bukan pesanan #{purchase_receival.supplier.name}")
+         return self 
+       end
     rescue
       self.errors.add(:purchase_order_entry_id, "Harus memilih item dari purchase order") 
       return self 

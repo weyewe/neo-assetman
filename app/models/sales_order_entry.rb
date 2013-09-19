@@ -162,7 +162,7 @@ class SalesOrderEntry < ActiveRecord::Base
     return true 
   end
   
-  def update_pending_receival_and_received( diff )  
+  def update_pending_delivery_and_delivered( diff )  
     self.pending_delivery -=  diff 
     self.delivered += diff 
     self.save

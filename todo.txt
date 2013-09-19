@@ -1,3 +1,8 @@
 on create purchase_order
 1. enter the code  (uniq) and length != 0 
 2. validate uniqueness of item ==> the code is somewhere
+
+
+on all documents
+=> in the source document, they have to select either supplier or customer
+in the update_object => put a brake mechanism => can only update the supplier/customer if it is linked to the source_document_entry  (consistent) 

@@ -49,6 +49,12 @@ class PurchaseReturn < ActiveRecord::Base
       return self 
     end
     
+    if self.purchase_return_entries.count != 0 and 
+      supplier_id != params[:supplier_id]
+      self.errors.add(:supplier_id, "Tidak boleh mengganti supplier. Sudah mengembalikan item")
+      return self 
+    end
+    
     self.supplier_id = params[:supplier_id]
     self.received_at = params[:received_at]
     self.code = params[:code]
@@ -77,6 +83,14 @@ class PurchaseReturn < ActiveRecord::Base
     if self.purchase_return_entries.count == 0 
       self.errors.add(:generic_errors, "Tidak ada yang dikembalikan. silakan tambah pengembalian.")
       return self 
+    end
+    
+    
+    self.purchase_return_entries.each do |pre|
+      if not pre.can_be_confirmed? 
+        self.errors.add(:generic_errors, pre.errors.messages[:generic_errors].first)
+        return self
+      end
     end
     
     

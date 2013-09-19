@@ -177,6 +177,43 @@ describe SalesDeliveryEntry do
           :quantity => @delivered_quantity
         )
       end
+      
+      it 'should not allow double sales_order_entry' do
+        @sde_2 = SalesDeliveryEntry.create_object(
+          :sales_delivery_id => @sd.id, 
+          :sales_order_entry_id => @soe.id ,
+          :quantity => @delivered_quantity
+        )
+        
+        @sde_2.should_not be_valid 
+      end
+      
+      context 'creating another sales delivery: must be uniq sales_order_entry in a given delivery' do
+        before(:each) do
+          @sde_2 = SalesDeliveryEntry.create_object(
+            :sales_delivery_id => @sd.id, 
+            :sales_order_entry_id => @soe_2.id ,
+            :quantity => @delivered_quantity
+          )
+        end
+        
+        it 'should create sde_2' do
+          @sde_2.should be_valid 
+        end
+        
+        it 'should preserve uniqueness of sales_order_entry' do
+          @sde_2.update_object(
+            :sales_delivery_id => @sd.id, 
+            :sales_order_entry_id => @soe.id ,
+            :quantity => @delivered_quantity
+          )
+          
+          @sde_2.errors.size.should_not == 0 
+        end
+        
+        
+        
+      end
 
       it 'should be valid sde' do
         @sde.should be_valid 

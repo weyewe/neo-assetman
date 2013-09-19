@@ -51,6 +51,14 @@ class SalesOrder < ActiveRecord::Base
       self.errors.add(:generic_errors, "Sudah konfirmasi, tidak bisa update")
       return self 
     end
+    
+    if self.sales_order_entries.count != 0 and 
+      customer_id != params[:customer_id]
+      self.errors.add(:customer_id, "Tidak boleh mengganti customer. Sudah memesan item")
+      return self 
+    end
+    
+    
     self.customer_id = params[:customer_id]
     self.sold_at = params[:sold_at]
     self.description = params[:description]

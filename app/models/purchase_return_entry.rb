@@ -35,7 +35,12 @@ class PurchaseReturnEntry < ActiveRecord::Base
     return if not self.all_fields_present? 
     
     begin
-       PurchaseOrderEntry.find purchase_order_entry_id   
+      poe = PurchaseOrderEntry.find purchase_order_entry_id   
+      if poe.purchase_order.supplier_id != self.purchase_return.supplier_id
+        self.errors.add(:purchase_order_entry_id, "Bukan pesanan #{purchase_return.supplier.name}")
+        return self 
+      end
+
     rescue
       self.errors.add(:purchase_order_entry_id, "Harus memilih item dari purchase order") 
       return self 
@@ -117,6 +122,17 @@ class PurchaseReturnEntry < ActiveRecord::Base
     end
     
     self.destroy 
+  end
+  
+  def can_be_confirmed?
+    self.valid_quantity 
+    
+    if self.errors.size != 0 
+      self.errors.add(:generic_errors, self.errors.messages[:quantity].first)
+      return false
+    end
+    
+    return true 
   end
   
   def confirm

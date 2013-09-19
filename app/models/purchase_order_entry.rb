@@ -4,6 +4,7 @@ class PurchaseOrderEntry < ActiveRecord::Base
   belongs_to :item 
   
   has_many :purchase_receival_entries
+  has_many :purchase_return_entries 
   
   validates_presence_of :quantity, :purchase_order_id, :item_id 
   

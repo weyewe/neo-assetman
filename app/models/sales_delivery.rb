@@ -74,6 +74,13 @@ class SalesDelivery < ActiveRecord::Base
       return self 
     end
     
+    if self.sales_delivery_entries.count != 0 and 
+      customer_id != params[:customer_id]
+      self.errors.add(:customer_id, "Tidak boleh mengganti customer. Sudah mengirim item")
+      return self 
+    end
+    
+    
     self.customer_id = params[:customer_id]
     self.delivered_at = params[:delivered_at]
     self.warehouse_id = params[:warehouse_id]

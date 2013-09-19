@@ -63,6 +63,13 @@ class PurchaseOrder < ActiveRecord::Base
       self.errors.add(:generic_errors, "Sudah konfirmasi, tidak bisa update")
       return self 
     end
+    
+    if self.purchase_order_entries.count != 0 and 
+      supplier_id != params[:supplier_id]
+      self.errors.add(:supplier_id, "Tidak boleh mengganti supplier. Sudah memesan item")
+      return self 
+    end
+    
     self.supplier_id = params[:supplier_id]
     self.purchased_at = params[:purchased_at]
     self.warehouse_id = params[:warehouse_id ] 

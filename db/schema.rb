@@ -147,12 +147,24 @@ ActiveRecord::Schema.define(version: 20130919025936) do
   end
 
   create_table "sales_return_entries", force: true do |t|
+    t.integer  "sales_return_id"
+    t.integer  "quantity",             default: 0
     t.integer  "sales_order_entry_id"
+    t.boolean  "is_confirmed",         default: false
+    t.datetime "confirmed_at"
+    t.string   "code"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
   create_table "sales_returns", force: true do |t|
+    t.integer  "customer_id"
+    t.text     "description"
+    t.datetime "received_at"
+    t.boolean  "is_confirmed", default: false
+    t.string   "code"
+    t.datetime "confirmed_at"
+    t.integer  "warehouse_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

@@ -35,7 +35,11 @@ class SalesDeliveryEntry < ActiveRecord::Base
     return if not self.all_fields_present? 
     
     begin
-       SalesOrderEntry.find sales_order_entry_id   
+       soe = SalesOrderEntry.find sales_order_entry_id   
+       if soe.sales_order.customer_id != self.sales_delivery.customer_id
+         self.errors.add(:sales_order_entry_id, "Bukan pesanan #{sales_delivery.customer.name}")
+         return self 
+       end
     rescue
       self.errors.add(:sales_order_entry_id, "Harus memilih item dari purchase order") 
       return self 
@@ -161,7 +165,7 @@ class SalesDeliveryEntry < ActiveRecord::Base
     self.confirmed_at = DateTime.now 
     if self.save 
       StockMutation.create_sales_delivery_entry_stock_mutations( self ) 
-      sales_order_entry.update_pending_receival_and_received( self.quantity )
+      sales_order_entry.update_pending_delivery_and_delivered( self.quantity )
     end
   end
   
@@ -224,7 +228,7 @@ class SalesDeliveryEntry < ActiveRecord::Base
     self.stock_mutations.each{|x| x.delete_object  }
     self.is_confirmed = false
     if self.save
-      sales_order_entry.update_pending_receival_and_received( -1*self.quantity )
+      sales_order_entry.update_pending_delivery_and_delivered( -1*self.quantity )
     end
   end
 end
