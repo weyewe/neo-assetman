@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130919025936) do
+ActiveRecord::Schema.define(version: 20130919095430) do
 
   create_table "customers", force: true do |t|
     t.string   "name"
@@ -169,14 +169,24 @@ ActiveRecord::Schema.define(version: 20130919025936) do
     t.datetime "updated_at"
   end
 
-  create_table "stock_adjustments", force: true do |t|
+  create_table "stock_adjustment_entries", force: true do |t|
+    t.integer  "stock_adjustment_id"
     t.integer  "item_id"
+    t.integer  "actual_quantity",     default: 0
+    t.integer  "initial_quantity",    default: 0
+    t.integer  "diff",                default: 0
+    t.boolean  "is_confirmed",        default: false
+    t.string   "code"
+    t.datetime "confirmed_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "stock_adjustments", force: true do |t|
+    t.text     "description"
     t.integer  "warehouse_id"
-    t.integer  "warehouse_item_id"
-    t.integer  "actual_quantity",   default: 0
-    t.integer  "initial_quantity",  default: 0
-    t.integer  "diff",              default: 0
-    t.boolean  "is_confirmed",      default: false
+    t.datetime "adjusted_at"
+    t.boolean  "is_confirmed", default: false
     t.string   "code"
     t.datetime "confirmed_at"
     t.datetime "created_at"

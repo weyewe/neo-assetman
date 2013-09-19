@@ -6,7 +6,7 @@ class StockAdjustmentEntry < ActiveRecord::Base
   belongs_to :item 
   
   
-  validates_presence_of :stock_adjustment_id , :item_id, :valid_actual_quantity
+  validates_presence_of :stock_adjustment_id , :item_id, :actual_quantity
   
   validate :valid_stock_adjustment_id
   validate :valid_actual_quantity
@@ -20,6 +20,7 @@ class StockAdjustmentEntry < ActiveRecord::Base
   end
   
   def valid_stock_adjustment_id
+    # puts "calling valid_stock_adjustment_id"
     return if not self.all_fields_present? 
     
     begin
@@ -31,6 +32,7 @@ class StockAdjustmentEntry < ActiveRecord::Base
   end
      
   def valid_actual_quantity
+    # puts "\ncalling valid actual quantity"
     return if not all_fields_present? 
     
     begin
@@ -39,28 +41,32 @@ class StockAdjustmentEntry < ActiveRecord::Base
         return self 
       end
       
+      if warehouse_item.nil? 
+        # puts "The warehouse item is nil"
+        self.errors.add(:item_id, "Kombinasi item dan warehouse tidak valid")
+        return self
+      end
+
       quantity_initial = warehouse_item.ready 
       quantity_diff = self.actual_quantity - quantity_initial
-      
+
+      # puts "The quantity_diff: #{quantity_diff}"
+
       if not self.is_confirmed? and quantity_diff == 0 
         msg = "Kuantitas sekarang sama seperti kuantitas awal (#{quantity_initial}) " + 
               " di gudang ini : #{warehouse_item.warehouse.name}"
         self.errors.add(:actual_quantity, msg)
         return self 
       end
-
+      
     rescue
-      self.errors.add(:item_id, "Item tidak valid")
+      # self.errors.add(:item_id, "Item tidak valid")
       return self 
     end
     
-    
-    
-  end
-
+  end 
   
-
-
+  
   def valid_item_id
     return if not self.all_fields_present? 
 
@@ -119,7 +125,8 @@ class StockAdjustmentEntry < ActiveRecord::Base
     new_object.stock_adjustment_id = params[:stock_adjustment_id]
     new_object.actual_quantity = params[:actual_quantity]
     
-   
+    
+    # puts "\n\n=====> Gonna save the new stock_adjustment_entry <====== \n"
     new_object.save  
     
     return new_object
@@ -178,8 +185,8 @@ class StockAdjustmentEntry < ActiveRecord::Base
   
   def warehouse_item
     WarehouseItem.find_or_create_object( 
-      :warehouse_id => self.purchase_order_entry.purchase_order.warehouse_id , 
-      :item_id => self.purchase_order_entry.item_id 
+      :warehouse_id => self.stock_adjustment.warehouse_id , 
+      :item_id => self.item_id 
     )
   end
  
