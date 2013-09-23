@@ -2,6 +2,9 @@ class Item < ActiveRecord::Base
   has_many :warehouses, :through => :warehouse_item 
   has_many :warehouse_items 
   
+  has_many :components, :through =>:compatibilities
+  has_many :compatibilities 
+  
   # stock mutation sources 
   has_many :stock_adjustments 
   has_many :stock_mutations

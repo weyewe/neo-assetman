@@ -90,3 +90,18 @@ STOCK_MUTATION_CASE = {
   :pending_receival => 2 ,
   :pending_delivery => 3 
 }
+
+COMPONENT_HISTORY_CASE = {
+  :default => 1, 
+  :maintenance => 2  
+}
+
+JOB_ORDER_CASE  = {
+  :maintenance => 1,
+  :emergency => 2 
+}
+
+JOB_ORDER_ENTRY_RESULT_CASE = {
+  :ok => 1, 
+  :broken => 2 
+}
