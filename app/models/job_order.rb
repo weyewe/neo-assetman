@@ -1,10 +1,13 @@
 class JobOrder < ActiveRecord::Base
   belongs_to :customer
+  belongs_to :employee 
   belongs_to :asset 
   belongs_to :warehouse
   belongs_to :employee 
   
-  validates_presence_of :customer_id, :warehouse_id, :asset_id, :employee_id , :case 
+  has_many :job_order_entries 
+  
+  validates_presence_of :customer_id, :warehouse_id, :asset_id, :employee_id , :case, :order_date 
   validate :valid_customer_id
   validate :valid_warehouse_id
   validate :valid_asset_id
@@ -16,8 +19,7 @@ class JobOrder < ActiveRecord::Base
     customer_id.present? and 
     warehouse_id.present? and 
     asset_id.present? and 
-    employee_id.present? and 
-    case.present? 
+    employee_id.present? 
   end
   
   
@@ -78,9 +80,13 @@ class JobOrder < ActiveRecord::Base
   def create_job_order_entries
     self.job_order_entries.each {|x| x.delete_object}
     
-    JobOrderEntry.create_object(
-      
-    )
+    self.asset.machine.components.each do |component|
+      JobOrderEntry.create_object(
+          :job_order_id => self.id, 
+          :component_id => component.id 
+      )
+    end
+    
   end
   
   def self.create_object( params ) 
@@ -92,6 +98,7 @@ class JobOrder < ActiveRecord::Base
     new_object.employee_id  = params[:employee_id  ]
     new_object.code         = params[:code]
     new_object.description  = params[:description]
+    new_object.order_date = params[:order_date]
     
     new_object.case = params[:case]
     if new_object.save 
@@ -114,6 +121,7 @@ class JobOrder < ActiveRecord::Base
     self.employee_id  = params[:employee_id  ]
     self.code         = params[:code]
     self.description  = params[:description]
+    self.order_date = params[:order_date]
 
     self.case = params[:case]
     if self.save
@@ -123,6 +131,8 @@ class JobOrder < ActiveRecord::Base
   end
   
   def confirm
+    # puts "Calling the confirm"
+    
     return if self.is_confirmed? 
     if self.job_order_entries.count == 0 
       self.errors.add(:generic_errors, "Tidak ada job order entry. silakan tambah")
@@ -132,6 +142,13 @@ class JobOrder < ActiveRecord::Base
     
     self.job_order_entries.each do |joe|
       if not joe.can_be_confirmed? 
+        # puts "=================\n\n"
+        # puts "joe.errors.messages.to_s: #{joe.errors.messages.to_s } " 
+        # joe.errors.messages.each do |msg|
+        #   # puts "The msg: #{msg}"
+        #   puts msg.to_s
+        # end
+        # puts "in the job_order#confirm. generic_errors: #{joe.errors.messages[:generic_errors]}"
         self.errors.add(:generic_errors, joe.errors.messages[:generic_errors].first)
         return self
       end
@@ -166,11 +183,7 @@ class JobOrder < ActiveRecord::Base
       self.errors.add(:generic_errors, 'Sudah konfirmasi')
       return self 
     end
-    
-    if self.job_order_entries.count !=  0
-      self.errors.add(:generic_errors, 'Sudah ada job order entry')
-      return self
-    end
+  
     
     self.job_order_entries.each {|x| x.delete_object}
     self.destroy

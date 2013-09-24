@@ -3,3 +3,6 @@ We are at the component:
 2. On create => what should be created? 
 
 3. On delete => what should be deleted as well
+
+
+JobOrder can't be confirmed if there is no sufficient spare part. 

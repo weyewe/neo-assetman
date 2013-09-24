@@ -10,7 +10,7 @@ class Asset < ActiveRecord::Base
   validate :valid_machine_id 
   
   
-  def all_fields_present
+  def all_fields_present?
     customer_id.present? and machine_id.present? 
   end
   

@@ -3,27 +3,58 @@ class Component < ActiveRecord::Base
   has_many :items, :through => :compatibilities
   has_many :compatibilities 
   has_many :component_histories 
+  has_many :job_order_entries
   
   validates_presence_of :machine_id, :name 
   
+  validate :uniqueness_of_machine_component_pair 
+  validate :valid_machine_id 
+  
+  
   
   def all_fields_present?
-    machine_id.present? 
+    machine_id.present?  and 
+    name.present? 
   end
   
   def valid_machine_id
     return if not self.all_fields_present? 
     
     begin
-       Machine.find valid_machine_id   
+       Machine.find machine_id   
     rescue
-      self.errors.add(:valid_machine_id, "Harus memilih customer") 
+      self.errors.add(:machine_id, "Harus memilih mesin") 
       return self 
     end
   end
   
+  def uniqueness_of_machine_component_pair
+    return if not all_fields_present?
+    
+    begin
+      
+      parent = self.machine
+      component_count = Component.where(
+        :name => self.name,
+        :machine_id => parent.id  
+      ).count 
+  
+      msg = "Component #{name} sudah terdaftar di mesin : #{machine.name}"
+
+      if not self.persisted? and component_count != 0
+        errors.add(:item_id , msg ) 
+      elsif self.persisted? and not self.item_name_changed? and component_count > 1 
+        errors.add(:item_id , msg ) 
+      elsif self.persisted? and  self.item_name_changed? and component_count  != 0 
+        errors.add(:item_id , msg )
+      end
+    rescue
+    end
+  end
+  
+  
   def update_component_history_and_job_entry
-    machine.assets.each do |asset|
+    self.machine.assets.each do |asset|
       
       ComponentHistory.create_setup_object( asset, new_object )
       JobOrder.where(:asset_id => asset.id, :is_confirmed => false).each do |jo|
@@ -39,7 +70,7 @@ class Component < ActiveRecord::Base
     new_object = self.new 
     new_object.machine_id = params[:machine_id]
     new_object.name = params[:name]
-    
+    # new_object.save
     new_object.update_component_history_and_job_entry if new_object.save
     return new_object 
   end

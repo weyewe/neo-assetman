@@ -365,4 +365,29 @@ class StockMutation < ActiveRecord::Base
     self.create_sales_return_entry_add_pending_delivery(sms)
     self.create_sales_return_entry_add_ready( sms )
   end
+  
+=begin
+  FROM JOB ORDER
+=end
+
+  def self.create_job_order_entry_mutation(sms)
+    warehouse_item = WarehouseItem.find_or_create_object(
+      :warehouse_id => sms.job_order.warehouse_id  , 
+      :item_id => sms.item_id
+    )
+    new_object = self.new 
+    new_object.stock_mutation_source_type = sms.class.to_s
+    new_object.stock_mutation_source_id = sms.id 
+    new_object.warehouse_id =  sms.job_order.warehouse_id 
+    new_object.warehouse_item_id =  warehouse_item.id 
+    new_object.item_id =  sms.item_id 
+    
+    new_object.quantity =  -1  
+    new_object.mutated_at = sms.confirmed_at 
+    new_object.case = STOCK_MUTATION_CASE[:ready]
+    
+    if new_object.save 
+      new_object.update_quantity( new_object.quantity )
+    end
+  end
 end

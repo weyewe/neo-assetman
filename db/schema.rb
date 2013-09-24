@@ -11,9 +11,48 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130919130300) do
+ActiveRecord::Schema.define(version: 20130923154057) do
+
+  create_table "assets", force: true do |t|
+    t.string   "code"
+    t.integer  "customer_id"
+    t.integer  "machine_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "compatibilities", force: true do |t|
+    t.integer  "item_id"
+    t.integer  "component_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "component_histories", force: true do |t|
+    t.integer  "asset_id"
+    t.integer  "item_id"
+    t.integer  "component_id"
+    t.integer  "case",               default: 1
+    t.integer  "job_order_entry_id"
+    t.boolean  "is_active",          default: true
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "components", force: true do |t|
+    t.integer  "machine_id"
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "customers", force: true do |t|
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "employees", force: true do |t|
     t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -26,6 +65,41 @@ ActiveRecord::Schema.define(version: 20130919130300) do
     t.integer  "ready",            default: 0
     t.integer  "pending_receival", default: 0
     t.integer  "pending_delivery", default: 0
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "job_order_entries", force: true do |t|
+    t.integer  "job_order_id"
+    t.integer  "component_id"
+    t.integer  "result_case"
+    t.boolean  "is_replaced",  default: false
+    t.text     "description"
+    t.integer  "item_id"
+    t.boolean  "is_confirmed", default: false
+    t.datetime "confirmed_at"
+    t.string   "code"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "job_orders", force: true do |t|
+    t.integer  "customer_id"
+    t.integer  "asset_id"
+    t.integer  "warehouse_id"
+    t.integer  "employee_id"
+    t.datetime "order_date"
+    t.integer  "case",         default: 1
+    t.text     "description"
+    t.boolean  "is_confirmed", default: false
+    t.datetime "confirmed_at"
+    t.string   "code"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "machines", force: true do |t|
+    t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

@@ -6,6 +6,8 @@ class CreateJobOrders < ActiveRecord::Migration
       t.integer :warehouse_id 
       t.integer :employee_id 
       
+      t.datetime :order_date 
+      
       t.integer :case , :default => JOB_ORDER_CASE[:maintenance]
       
       t.text :description 
