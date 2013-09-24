@@ -181,7 +181,7 @@ class JobOrderEntry < ActiveRecord::Base
     
     if valid_inspection_result?
       
-      if warehouse_item.ready < 1
+      if not warehouse_item.nil? and warehouse_item.ready < 1
         self.errors.add(:generic_errors, "Tidak ada spare part untuk mengganti component #{component.name}")
       end
     end
@@ -231,7 +231,7 @@ class JobOrderEntry < ActiveRecord::Base
     return self if not self.can_be_unconfirmed? 
     
     
-    self.stock_mutation.delete_object  
+    self.stock_mutation.delete_object   if not self.stock_mutation.nil?
     self.is_confirmed = false
     self.save
   end

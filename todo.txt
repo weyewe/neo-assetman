@@ -5,4 +5,7 @@ We are at the component:
 3. On delete => what should be deleted as well
 
 
-JobOrder can't be confirmed if there is no sufficient spare part. 
+JobOrder can't be confirmed if there is no sufficient spare part.  DONE
+
+
+if there is job order created => update machine, update component, update compatibility , update asset 

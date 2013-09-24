@@ -225,67 +225,98 @@ describe JobOrderEntry do
         @joe_2.errors.size.should == 0 
       end
       
-      # it 'should create valid_result_case @joe_1' do
-      #   puts "\n\n ====================> Valid Result Case 1 <============== \n\n"
-      #   
-      #   puts "joe_1 result_case : #{@joe_1.result_case}"
-      #   @joe_1.valid_result_case?.should be_true
-      #   @joe_1.errors.size.should == 0
-      # end
+      it 'should create valid_result_case @joe_1' do
+        # puts "\n\n ====================> Valid Result Case 1 <============== \n\n"
+        
+        # puts "joe_1 result_case : #{@joe_1.result_case}"
+        @joe_1.valid_result_case?.should be_true
+        @joe_1.errors.size.should == 0
+      end
       
       it 'should create valid_result_case @joe_2' do
-        puts "\n\n ====================> Valid Result Case  1<============== \n\n"
+        # puts "\n\n ====================> Valid Result Case  1<============== \n\n"
         
-        puts "joe_2 result_case : #{@joe_2.result_case}"
+        # puts "joe_2 result_case : #{@joe_2.result_case}"
         @joe_2.valid_result_case?.should be_true
         @joe_2.errors.messages.each {|x| puts "msg: #{x}"}
         @joe_2.errors.size.should == 0
       end
       
-      # 
-      # it 'should not allow confirmation' do
-      #   @job_order.confirm
-      #   @job_order.is_confirmed.should be_false # because we have no ready item 
-      #   @job_order.errors.size.should_not == 0 
-      #   # @job_order.errors.messages.each {|x| puts "job_order_entry_spec msg: #{x}"}
-      # end
-      # 
-      # context "create ready item to confirm the job order " do
-      #   before(:each) do
-      #     @sa = StockAdjustment.create_object(
-      #       :adjusted_at  => @adjusted_at,  
-      #       :warehouse_id => @wh_1.id ,  
-      #       :description  => "The adjustment description",  
-      #       :code         => "ADJ234"
-      #     )
-      #     
-      #     @quantity = 5 
-      #     @sae = StockAdjustmentEntry.create_object(
-      #       :stock_adjustment_id => @sa.id ,
-      #       :item_id => @component_2_item_1.id ,
-      #       :actual_quantity => @quantity
-      #     )
-      #     @sa.reload
-      #     @sa.confirm
-      #     @component_2_item_1.reload 
-      #     @job_order.reload 
-      #   end
-      #   
-      #   it 'should produce ready item ' do
-      #     @component_2_item_1.ready.should == @quantity
-      #   end
-      #   
-      #   it 'should allow job order confirmation' do
-      #     @job_order.confirm
-      #     @job_order.errors.messages.each {|x| puts "msg: #{x}"}
-      #     @job_order.is_confirmed.should be_true 
-      #     @component_2_item_1.reload 
-      #     @component_2_item_1.ready.should == @quantity -1 
-      #   end
-      #   
-      #   
-      # end
-      #   
+      
+      it 'should not allow confirmation' do
+        @job_order.confirm
+        @job_order.is_confirmed.should be_false # because we have no ready item 
+        @job_order.errors.size.should_not == 0 
+        # @job_order.errors.messages.each {|x| puts "job_order_entry_spec msg: #{x}"}
+      end
+      
+      context "create ready item to confirm the job order " do
+        before(:each) do
+          @sa = StockAdjustment.create_object(
+            :adjusted_at  => @adjusted_at,  
+            :warehouse_id => @wh_1.id ,  
+            :description  => "The adjustment description",  
+            :code         => "ADJ234"
+          )
+          
+          @quantity = 5 
+          @sae = StockAdjustmentEntry.create_object(
+            :stock_adjustment_id => @sa.id ,
+            :item_id => @component_2_item_1.id ,
+            :actual_quantity => @quantity
+          )
+          @sa.reload
+          @sa.confirm
+          @component_2_item_1.reload 
+          @job_order.reload 
+        end
+        
+        it 'should produce ready item ' do
+          @component_2_item_1.ready.should == @quantity
+        end
+        
+        it 'should allow job order confirmation' do
+          @job_order.confirm
+          @job_order.errors.messages.each {|x| puts "msg: #{x}"}
+          @job_order.is_confirmed.should be_true 
+          @component_2_item_1.reload 
+          @component_2_item_1.ready.should == @quantity -1 
+        end
+        
+        context "confirming the job order" do
+          before(:each) do
+            @job_order.confirm
+            @joe_1.reload
+            @joe_2.reload
+          end
+          
+          it 'should create stock_mutation entry' do
+            @joe_1.stock_mutation.should be_nil
+            @joe_2.stock_mutation.should be_valid
+          end
+          
+          context "job order unconfirm" do
+            before(:each) do
+              @job_order.unconfirm
+              @joe_1.reload
+              @joe_2.reload
+              @component_2_item_1.reload
+            end
+            
+            it 'should delete stock_mutation' do
+              @component_2_item_1.ready.should == @quantity
+            end
+            
+            it 'should delete the stock_mtation' do
+              @joe_1.stock_mutation.should be_nil
+              @joe_2.stock_mutation.should be_nil 
+            end
+          end
+        end
+        
+        
+      end
+        
   
   
     end
