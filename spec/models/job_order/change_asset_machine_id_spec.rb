@@ -1,0 +1,175 @@
+require 'spec_helper'
+
+describe JobOrderEntry do
+  before(:each) do
+    @wh_1 = Warehouse.create_object(
+      :name => "Warehouse 1",
+      :description => "Our main warehouse"
+    )
+    
+    @wh_2 = Warehouse.create_object(
+      :name => "Warehouse 2",
+      :description => "Mobile Warehouse #1"
+    )
+    
+    @employee = Employee.create_object(
+      :name => "Karyawan 1"
+    )
+    
+    @name_1=  "Awesome1"
+    @machine_1 = Machine.create_object(
+      :name => @name_1 
+    )
+    @name_2 =  "Awesome2"
+    @machine_2 = Machine.create_object(
+      :name => @name_2 
+    )
+    @component_name_1 = "Component1"
+    @component_name_2 = "Component2"
+    
+    @component_1 = Component.create_object(
+      :machine_id => @machine_1.id,
+      :name => @component_name_1 
+    )
+    
+    @component_2 = Component.create_object(
+      :machine_id => @machine_1.id,
+      :name =>  @component_name_2 
+    )
+    
+   
+    
+    @component_2_1_name = "COMP21"
+    @component_2_2_name = "COMP22"
+    @component_2_3_name = "COMP23"
+    
+    @component_2_1 = Component.create_object(
+      :machine_id => @machine_2.id,
+      :name => @component_2_1_name 
+    )
+    @component_2_1 = Component.create_object(
+      :machine_id => @machine_2.id,
+      :name => @component_2_2_name 
+    )
+    @component_2_1 = Component.create_object(
+      :machine_id => @machine_2.id,
+      :name => @component_2_3_name 
+    )
+    
+    
+    
+    
+    
+    @component_1_item_1_name = "Item1"
+    @component_2_item_1_name = "Item2"
+    @component_1_item_1_code = "faewf"
+    @component_2_item_1_code = "HS234"
+    
+    @component_1_item_1 = Item.create_object(
+      :name =>  @component_1_item_1_name,
+      :code => @component_1_item_1_code
+    )
+    
+    @component_2_item_1 = Item.create_object(
+      :name => @component_2_item_1_name ,
+      :code => @component_2_item_1_code
+    )
+    
+    @compatibility_1_item_1 = Compatibility.create_object(
+      :item_id => @component_1_item_1.id,
+      :component_id => @component_1.id 
+    )
+    
+    @compatibility_2_item_1 = Compatibility.create_object(
+      :item_id => @component_2_item_1.id,
+      :component_id => @component_2.id 
+    )
+    
+    @item_3 = Item.create_object(
+      :name =>  "Item 3 name",
+      :code => 'xafaw3'
+    )
+    
+   
+    @customer = Customer.create_object(
+      :name => "Customer1"
+    )
+    
+    
+    @asset_1_code = "hh234"
+    @asset = Asset.create_object(
+      :customer_id => @customer.id, 
+      :machine_id => @machine_1.id ,
+      :code => @asset_1_code
+    )
+    
+    @asset.reload 
+    @order_date = DateTime.new(2013,12,11,0 ,0 ,0)
+    @adjusted_at = DateTime.new(2012,10,5,0,0,0)
+    
+    
+    # create StockAdjustment 
+    @sa = StockAdjustment.create_object(
+      :adjusted_at  => @adjusted_at,  
+      :warehouse_id => @wh_1.id ,  
+      :description  => "The adjustment description",  
+      :code         => "ADJ234"
+    )
+    
+    @quantity = 5 
+    @sae = StockAdjustmentEntry.create_object(
+      :stock_adjustment_id => @sa.id ,
+      :item_id => @component_2_item_1.id ,
+      :actual_quantity => @quantity
+    )
+    
+    @sa.confirm 
+    
+    
+    
+    @component_2_item_1.reload 
+  end
+  
+  it 'should allowed to change machine' do
+    @asset.update_object(
+      :customer_id => @customer.id, 
+      :machine_id => @machine_2.id ,
+      :code => @asset_1_code
+    )
+    
+    @asset.errors.size.should == 0 
+    @asset.should be_valid 
+    @asset.machine_id.should == @machine_2.id 
+  end
+  
+  context 'creating job order' do
+    before(:each) do
+      @job_order = JobOrder.create_object(
+        :customer_id  => @customer.id,
+        :warehouse_id => @wh_1.id,
+        :asset_id     => @asset.id,
+        :employee_id  => @employee.id,
+        :code         => 'JO.3321',
+        :description  => "Butuh perbaikan. tidak dingin.",
+        :order_date   => @order_date,
+        :case         => JOB_ORDER_CASE[:emergency]
+      )
+      
+      @asset.reload 
+    end
+    
+    it 'should not allow machine_id update if there is job order' do
+      @asset.update_object(
+        :customer_id => @customer.id, 
+        :machine_id => @machine_2.id ,
+        :code => @asset_1_code
+      )
+      
+      @asset.errors.size.should_not == 0 
+    end
+  end
+  
+   
+  
+  
+end

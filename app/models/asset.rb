@@ -2,6 +2,7 @@ class Asset < ActiveRecord::Base
   has_many :component_histories
   belongs_to :machine 
   belongs_to :customer 
+  has_many :job_orders 
   
   validates_uniqueness_of :code 
   validates_presence_of :customer_id, :code, :machine_id 
@@ -66,6 +67,8 @@ class Asset < ActiveRecord::Base
       return self
     end
     
+   
+    
     is_machine_id_changed = false 
     if self.machine_id != params[:machine_id].to_i
       is_machine_id_changed = true 
@@ -75,9 +78,13 @@ class Asset < ActiveRecord::Base
     self.machine_id = params[:machine_id]
     self.code = params[:code]
     
-    if self.save 
-      self.setup_component_histories  if is_machine_id_changed
+    
+    if is_machine_id_changed and self.job_orders.count != 0
+      self.errors.add(:machine_id, "Tidak bisa merubah mesin karena sudah ada pengerjaan")
+      return self 
     end
+
+    self.save 
     
     return self 
   end

@@ -56,11 +56,11 @@ class Component < ActiveRecord::Base
   def update_component_history_and_job_entry
     self.machine.assets.each do |asset|
       
-      ComponentHistory.create_setup_object( asset, new_object )
+      ComponentHistory.create_setup_object( asset, self )
       JobOrder.where(:asset_id => asset.id, :is_confirmed => false).each do |jo|
         JobOrderEntry.create_object(
           :job_order_id => jo.id, 
-          :component_id => new_object.id 
+          :component_id => self.id 
         )
       end
     end
@@ -113,7 +113,7 @@ class Component < ActiveRecord::Base
       self.component_histories.each {|x| x.delete_object }
     end
     
-    if JobOrderEntry.has_confirmed_replacement_component_entry?(self)
+    if JobOrderEntry.has_confirmed_job_order_entry?(self)
       self.errors.add(:generic_errors, "Sudah ada job order entry yang dikonfirmasi")
       return self 
     else

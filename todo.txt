@@ -9,3 +9,21 @@ JobOrder can't be confirmed if there is no sufficient spare part.  DONE
 
 
 if there is job order created => update machine, update component, update compatibility , update asset 
+
+
+job_order will need to be revised (the list of job order entries ) if these followings are updated:
+
+1. Machine's component  ( DONE ) 
+	=> on add or delete.. it can't delete if there is confirmed job order entry
+	=> on addition, it has to find all job orders (unconfirmed), and create the corresponding component job
+	 order entry 
+	
+	# what if there is no compatibility created yet? Too bad. can't update the job order entry. Hence,
+		no job order confirmation.
+
+
+2. Asset's machine (if there is job order, not allowed to change machine). If there is no job order,
+		allow to change the machine. 
+	
+3. Component's compatibility. If there is job order using such particular item in the compatibility, 
+   the compatibility can't be deleted.

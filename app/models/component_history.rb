@@ -18,4 +18,8 @@ class ComponentHistory < ActiveRecord::Base
     self.where(:case => COMPONENT_HISTORY_CASE[:maintenance], 
               :component_id => component.id).count != 0 
   end
+  
+  def delete_object
+    self.destroy 
+  end
 end
