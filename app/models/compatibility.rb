@@ -87,6 +87,17 @@ class Compatibility < ActiveRecord::Base
       return self 
     end
     
+    if JobOrderEntry.where(
+      :is_confirmed => true, 
+      :component_id => self.component_id, 
+      :item_id => self.item_id,
+      :result_case =>   JOB_ORDER_ENTRY_RESULT_CASE[:broken]  ,
+      :is_replaced => true 
+    ).count != 0 
+      self.errors.add(:generic_errors, "Sudah ada penggantian dengan item ini")
+      return self 
+    end
+    
     self.destroy 
   end
   
